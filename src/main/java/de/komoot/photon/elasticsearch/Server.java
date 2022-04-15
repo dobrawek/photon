@@ -11,9 +11,7 @@ import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.node.InternalSettingsPreparer;
 import org.elasticsearch.node.Node;
@@ -21,6 +19,8 @@ import org.elasticsearch.node.NodeValidationException;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.transport.Netty4Plugin;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.elasticsearch.xcontent.XContentBuilder;
+import org.elasticsearch.xcontent.XContentFactory;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -39,9 +39,9 @@ import java.util.*;
 public class Server {
     /**
      * Database version created by new imports with the current code.
-     *
+     * <p>
      * Format must be: major.minor.patch-dev
-     *
+     * <p>
      * Increase to next to be released version when the database layout
      * changes in an incompatible way. If it is alredy at the next released
      * version, increase the dev version.
@@ -61,7 +61,7 @@ public class Server {
 
     protected static class MyNode extends Node {
         public MyNode(Settings preparedSettings, Collection<Class<? extends Plugin>> classpathPlugins) {
-            super(InternalSettingsPreparer.prepareEnvironment(preparedSettings, null), classpathPlugins);
+            super(InternalSettingsPreparer.prepareEnvironment(preparedSettings, null, null, null), classpathPlugins, false);
         }
     }
 
@@ -90,9 +90,9 @@ public class Server {
                 if (index >= 0) {
                     int port = Integer.parseInt(tAddr.substring(index + 1));
                     String addrStr = tAddr.substring(0, index);
-                    trClient.addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress(addrStr, port)));
+                    trClient.addTransportAddress(new TransportAddress(new InetSocketAddress(addrStr, port)));
                 } else {
-                    trClient.addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress(tAddr, 9300)));
+                    trClient.addTransportAddress(new TransportAddress(new InetSocketAddress(tAddr, 9300)));
                 }
             }
 
@@ -216,28 +216,28 @@ public class Server {
     }
 
 
-   /**
+    /**
      * Save the global properties to the database.
-     *
+     * <p>
      * The function saved properties available as members and the database version
      * as currently defined in DATABASE_VERSION.
      */
-    public void saveToDatabase(DatabaseProperties dbProperties) throws IOException  {
+    public void saveToDatabase(DatabaseProperties dbProperties) throws IOException {
         final XContentBuilder builder = XContentFactory.jsonBuilder().startObject().startObject(BASE_FIELD)
-                        .field(FIELD_VERSION, DATABASE_VERSION)
-                        .field(FIELD_LANGUAGES, String.join(",", dbProperties.getLanguages()))
-                        .endObject().endObject();
+                .field(FIELD_VERSION, DATABASE_VERSION)
+                .field(FIELD_LANGUAGES, String.join(",", dbProperties.getLanguages()))
+                .endObject().endObject();
 
         esClient.prepareIndex(PhotonIndex.NAME, PhotonIndex.TYPE).
-                    setSource(builder).setId(PROPERTY_DOCUMENT_ID).execute().actionGet();
+                setSource(builder).setId(PROPERTY_DOCUMENT_ID).execute().actionGet();
     }
 
     /**
      * Load the global properties from the database.
-     *
+     * <p>
      * The function first loads the database version and throws an exception if it does not correspond
      * to the version as defined in DATABASE_VERSION.
-     *
+     * <p>
      * Currently does nothing when the property entry is missing. Later versions with a higher
      * database version will then fail.
      */
@@ -252,7 +252,7 @@ public class Server {
         Map<String, String> properties = (Map<String, String>) response.getSource().get(BASE_FIELD);
 
         if (properties == null) {
-            throw new RuntimeException("Found database properties but no '" + BASE_FIELD +"' field. Database corrupt?");
+            throw new RuntimeException("Found database properties but no '" + BASE_FIELD + "' field. Database corrupt?");
         }
 
         String version = properties.getOrDefault(FIELD_VERSION, "");

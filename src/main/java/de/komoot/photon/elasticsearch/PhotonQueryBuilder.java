@@ -1,12 +1,12 @@
 package de.komoot.photon.elasticsearch;
 
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Point;
+import org.elasticsearch.common.lucene.search.function.FunctionScoreQuery;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Point;
 import de.komoot.photon.searcher.TagFilter;
 import de.komoot.photon.searcher.TagFilterKind;
 import org.elasticsearch.common.lucene.search.function.CombineFunction;
-import org.elasticsearch.common.lucene.search.function.FiltersFunctionScoreQuery.ScoreMode;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
@@ -130,7 +130,7 @@ public class PhotonQueryBuilder {
         finalQueryWithoutTagFilterBuilder = QueryBuilders.functionScoreQuery(query4QueryBuilder, new FilterFunctionBuilder[]{
                 new FilterFunctionBuilder(ScoreFunctionBuilders.linearDecayFunction("importance", "1.0", "0.6")),
                 new FilterFunctionBuilder(QueryBuilders.matchQuery("classification", query), ScoreFunctionBuilders.weightFactorFunction(0.1f))
-        }).scoreMode(ScoreMode.SUM);
+        }).scoreMode(FunctionScoreQuery.ScoreMode.SUM);
 
         // Filter for later: records that have a housenumber and no name must only appear when the housenumber matches.
         queryBuilderForTopLevelFilter = QueryBuilders.boolQuery()
@@ -173,7 +173,7 @@ public class PhotonQueryBuilder {
                 QueryBuilders.functionScoreQuery(finalQueryWithoutTagFilterBuilder, new FilterFunctionBuilder[] {
                      new FilterFunctionBuilder(ScoreFunctionBuilders.exponentialDecayFunction("coordinate", params, radius + "km", radius / 10 + "km", 0.8)),
                      new FilterFunctionBuilder(ScoreFunctionBuilders.linearDecayFunction("importance", "1.0", scale))
-                }).boostMode(CombineFunction.MULTIPLY).scoreMode(ScoreMode.MAX);
+                }).boostMode(CombineFunction.MULTIPLY).scoreMode(FunctionScoreQuery.ScoreMode.MAX);
         return this;
     }
     
