@@ -1,6 +1,8 @@
 plugins {
     java
     id("maven-publish")
+    application
+    jacoco
 }
 
 group = "de.komoot.photon"
@@ -42,6 +44,9 @@ dependencies {
     testAnnotationProcessor("org.projectlombok:lombok:1.18.22")
 }
 
+application {
+    mainClass.set("de.komoot.photon.App")
+}
 
 publishing {
     publications.create<MavenPublication>("maven") {
@@ -51,4 +56,11 @@ publishing {
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
 }
