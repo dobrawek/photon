@@ -2,7 +2,7 @@ package de.komoot.photon.elasticsearch;
 
 import de.komoot.photon.Utils;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.xcontent.XContentType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;

@@ -2,7 +2,7 @@ package de.komoot.photon.elasticsearch;
 
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.xcontent.XContentType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;

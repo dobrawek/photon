@@ -1,6 +1,7 @@
 package de.komoot.photon.elasticsearch;
 
-import com.vividsolutions.jts.geom.Point;
+import org.elasticsearch.core.TimeValue;
+import org.locationtech.jts.geom.Point;
 import de.komoot.photon.query.ReverseRequest;
 import de.komoot.photon.searcher.PhotonResult;
 import de.komoot.photon.searcher.ReverseHandler;
@@ -9,7 +10,6 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.geo.GeoPoint;
-import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -34,7 +34,7 @@ public class ElasticsearchReverseHandler implements ReverseHandler {
         SearchResponse results = search(queryBuilder.buildQuery(), photonRequest.getLimit(), photonRequest.getLocation(),
                 photonRequest.getLocationDistanceSort());
 
-        List<PhotonResult> ret = new ArrayList<>((int) results.getHits().getTotalHits());
+        List<PhotonResult> ret = new ArrayList<>((int)results.getHits().getTotalHits().value);
         for (SearchHit hit : results.getHits()) {
             ret.add(new ElasticResult(hit));
         }

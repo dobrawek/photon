@@ -21,9 +21,10 @@ package org.elasticsearch.bootstrap;
 
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.Version;
-import org.elasticsearch.common.SuppressForbidden;
-import org.elasticsearch.common.io.PathUtils;
 import org.elasticsearch.common.logging.Loggers;
+import org.elasticsearch.core.PathUtils;
+import org.elasticsearch.core.SuppressForbidden;
+import org.elasticsearch.jdk.JavaVersion;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
